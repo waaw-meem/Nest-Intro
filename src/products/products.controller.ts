@@ -1,12 +1,14 @@
 import { Controller,Post } from "@nestjs/common";
-import { Body, Get, Param } from "@nestjs/common/decorators";
+import { Body, Delete, Get, Param,Patch } from "@nestjs/common/decorators";
 import { ProductService } from "./products.service";
 
-
+// Controller is used to req and send response
 @Controller('products')
 export class ProductController{
+    // Injecting other functionalities
     constructor(private readonly productService:ProductService){}
 
+    // POST Req and importing as well
     @Post()
     addProduct(
         @Body('name') prodTitle:string,
@@ -17,16 +19,35 @@ export class ProductController{
         return {id:generatedId}
     }
 
+   // GET Req
     @Get()
     getAllProducts(){
         return this.productService.getProducts()
     }
 
-    // @Get(':id')
-    // getSingleProduct(
-    //     @Param('id') prodId:string
-    // ){
-    //     return this.productService.getProduct(prodId)
-    // }
+    // GET Req with params
+    @Get(':id')
+    getSingleProduct(
+        @Param('id') prodId:string
+    ){
+        return this.productService.getProduct(prodId)
+    }
+
+    @Patch(':id')
+    updateProduct(
+        @Param('id') prodId:string,
+        @Body('name') prodTitle:string,
+        @Body('price') prodNumber:number,
+        @Body('description') prodDescription:string
+    ){
+        this.productService.getUpdateProduct(prodId,prodTitle,prodNumber,prodDescription)
+    }
+
+    @Delete(':id')
+    deleteProduct(
+        @Param('id') prodId:string,
+    ){
+        this.productService.removeProduct(prodId)
+    }
 
 }
