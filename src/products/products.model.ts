@@ -1,25 +1,34 @@
-export class Product{
+import * as mongoose from 'mongoose'
 
-    // First Method (Previous Method)
-    // id:string
-    // name:string
-    // price:number
-    // description:string
-
-    // constructor(id:string, name:string,price:number,description:string){
-    //     this.id = id
-    //     this.name = name
-    //     this.price = price
-    //     this.description = description
-    // }
+export const ProductSchema = new mongoose.Schema({
+    title:{type:String,required:true},
+    price:{type:String,required:true},
+    description:{type:String,required:true}
+})
 
 
-    // Second Method
+// export class Product{
 
-    constructor(
-        public id:string, 
-        public name:string,
-        public price:number,
-        public description:string
-        ){}
-}
+//     // First Method (Previous Method)
+//     // id:string
+//     // name:string
+//     // price:number
+//     // description:string
+
+//     // constructor(id:string, name:string,price:number,description:string){
+//     //     this.id = id
+//     //     this.name = name
+//     //     this.price = price
+//     //     this.description = description
+//     // }
+
+
+//     // Second Method
+
+//     // constructor(
+//     //     public id:string, 
+//     //     public name:string,
+//     //     public price:number,
+//     //     public description:string
+//     //     ){}
+// }
