@@ -1,26 +1,45 @@
 import { NotFoundException } from "@nestjs/common";
 import { Injectable } from "@nestjs/common/decorators";
 import { Product } from "./products.model";
-import { title } from "process";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
 
 @Injectable()
 export class ProductService{
-    private products: Product[] = []
+    // private products: Product[] = []
 
-    insertProduct(name:string,price:number,description:string){
+    constructor(@InjectModel('Product') private readonly productModel:Model<Product>){}
+
+
+    // We use async and await which work exactly like then()
+    async insertProduct(name:string,price:number,description:string){
         // const prodId = new Date().toString()
         const prodId = Math.random().toString()
-        const newProduct = new Product(prodId,name,price,description)
+        const newProduct = new this.productModel({
+            name:name,
+            price:price,
+            description:description
+        })
 
-        this.products.push(newProduct)
-        return prodId
+        // First Method to push new element in an array
+        // this.products.push(newProduct)
+
+        const result = await newProduct.save()
+        return result.id as string
     }
 
-    getProducts(){
-        return [...this.products] // Copying array and adding array element
+    async getProducts(){
+        const products = await this.productModel.find().exec()
+        return products.map((prod) => ({
+            id:prod.id, 
+            name:prod.name, 
+            price:prod.price,
+            description:prod.description
+        }))
+        // return [...this.products] // Copying array and adding array element
     }
 
-    getProduct(prodId:string){
+    async getProduct(prodId:string){
         // const product = this.products.find(prod => prod.id === prodId)
 
         // if(!product){
@@ -28,14 +47,22 @@ export class ProductService{
         // }
         // return {...product}// Copying object and adding array element
 
-        const product = this.findProduct(prodId)[0]
-        return {...product}
+        // const product = this.findProduct(prodId)[0]
+        // return {...product}
+
+        const product = await this.findProduct(prodId)
+        return {
+            id:product.id,
+            name:product.name,
+            price:product.price,
+            description:product.description,
+        }
+
     }
 
-    getUpdateProduct(prodId:string,name:string,price:number,description:string){
+    async getUpdateProduct(prodId:string,name:string,price:number,description:string){
         // const product = this.findProduct(prodId)
-        const [product,index] = this.findProduct(prodId)
-        const updatedProduct = {...product}
+        const updatedProduct = await this.findProduct(prodId)
         if(name){
             updatedProduct.name = name
         }
@@ -45,23 +72,37 @@ export class ProductService{
         if(description){
             updatedProduct.description = description
         }
-        this.products[index] = updatedProduct
+        updatedProduct.save()
     }
 
-    removeProduct(prodId:string){
-        const index = this.findProduct(prodId)[1]
-        this.products.splice(index,1)
+    async removeProduct(prodId:string){
+        // const index = await this.findProduct(prodId)
+        // this.products.splice(index,1)
+
+        // With the help of mongoose
+       const result = await this.productModel.deleteOne({_id:prodId}).exec()
+    //    if(result.n === 0){
+    //     throw new NotFoundException('could not find product')
+    //    }
     }
 
-    private findProduct(id:string):[Product,number]{
+    private async findProduct(id:string):Promise<Product>{
         // FindIndex actually give the index number of product in array
-        const productIndex = this.products.findIndex(prod => prod.id === id)
+        // const productIndex = this.products.findIndex(prod => prod.id === id)
         // It assign the single product by getting products list and 
-        const product = this.products[productIndex]
+        // const product = this.products[productIndex]
+
+        // Working with Mongoose different scenerio
+        let product;
+        try{
+            product = await this.productModel.findById(id)
+        }catch(error){
+            throw new NotFoundException('could not find product')
+        }
         if(!product){
             throw new NotFoundException('could not find product')
         }
-        return [product,productIndex]
+        return product
     }
 
 }

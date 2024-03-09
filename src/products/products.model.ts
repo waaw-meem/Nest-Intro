@@ -7,6 +7,13 @@ export const ProductSchema = new mongoose.Schema({
 })
 
 
+export interface Product extends mongoose.Document{
+        id:string;
+        name:string;
+        price:number;
+        description:string;
+}
+
 // export class Product{
 
 //     // First Method (Previous Method)

@@ -4,25 +4,28 @@ import { ProductService } from "./products.service";
 
 // Controller is used to req and send response
 @Controller('products')
+
 export class ProductController{
     // Injecting other functionalities
     constructor(private readonly productService:ProductService){}
 
     // POST Req and importing as well
     @Post()
-    addProduct(
+    async addProduct(
         @Body('name') prodTitle:string,
         @Body('price') prodNumber:number,
         @Body('description') prodDescription:string
-    ): any{
-        const generatedId = this.productService.insertProduct(prodTitle,prodNumber,prodDescription)
+    ): Promise<any> {
+        const generatedId = await this.productService
+        .insertProduct(prodTitle,prodNumber,prodDescription)
         return {id:generatedId}
     }
 
    // GET Req
     @Get()
-    getAllProducts(){
-        return this.productService.getProducts()
+    async getAllProducts(){
+        const products = await this.productService.getProducts()
+        return products
     }
 
     // GET Req with params
@@ -34,20 +37,23 @@ export class ProductController{
     }
 
     @Patch(':id')
-    updateProduct(
+    async updateProduct(
         @Param('id') prodId:string,
         @Body('name') prodTitle:string,
         @Body('price') prodNumber:number,
         @Body('description') prodDescription:string
     ){
-        this.productService.getUpdateProduct(prodId,prodTitle,prodNumber,prodDescription)
+        await this.productService
+        .getUpdateProduct(prodId,prodTitle,prodNumber,prodDescription)
+        return null
     }
 
     @Delete(':id')
-    deleteProduct(
+    async deleteProduct(
         @Param('id') prodId:string,
     ){
-        this.productService.removeProduct(prodId)
+       await  this.productService.removeProduct(prodId)
+       return null
     }
 
 }
